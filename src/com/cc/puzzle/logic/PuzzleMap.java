@@ -2,10 +2,9 @@ package com.cc.puzzle.logic;
 
 import java.util.LinkedList;
 
-import com.cc.puzzle.logic.PuzzleUtils.PuzzleOperate;
+import com.cc.puzzle.logic.PuzzleModel.PuzzleOperate;
 
 
-import android.net.UrlQuerySanitizer.ValueSanitizer;
 import android.util.Log;
 
 class PuzzleMap {
@@ -15,8 +14,31 @@ class PuzzleMap {
 	private PuzzleNumber[][] numberMap;
 	
 	public PuzzleMap(){
+		//Init the map
 		numberMap = new PuzzleNumber[MAP_SIZE][MAP_SIZE];
-		initMap();
+		for(int i = 0; i < MAP_SIZE; i++){
+			for(int j = 0; j < MAP_SIZE; j++){
+				numberMap[i][j] = new PuzzleNumber();
+			}
+		}
+	}
+	
+	public void initMap(){
+		Log.v(TAG, "Init the Puzzle Map");
+		
+		//Create two init number
+		generateNewNumberInMap();
+		generateNewNumberInMap();
+	}
+	
+	public void resetMap(){
+		
+		Log.v(TAG, "Reset the Puzzle Map");
+		for(int i = 0; i < MAP_SIZE; i++){
+			for(int j = 0; j < MAP_SIZE; j++){
+				numberMap[i][j].clear();
+			}
+		}
 	}
 	
 	public void generateNewNumberInMap(){
@@ -38,9 +60,30 @@ class PuzzleMap {
 		int newNumber = PuzzleUtils.generateNumber();
 		Log.v(TAG, "Generate New Number In Puzzle Map");
 		setNumberInMap(position.getRow(), position.getColumn(), newNumber);
+		
+		//dump map
+		dumpNumberMap();
 	}
 	
 	public int doSwipe(PuzzleOperate operate){
+		int ret = 0;
+		switch (operate) {
+		case SWIPE_UP:
+			ret = doSwipeUp();
+			break;
+		case SWIPE_DOWN:
+			ret = doSwipeDown();
+			break;
+		case SWIPE_LEFT:
+			ret = doSwipeLeft();
+			break;
+		case SWIPE_RIGHT:
+			ret = doSwipeRight();
+			break;
+		default:
+			ret = 0;
+			break;
+		}
 		//Clear combine flag
 		for(int i = 0; i < MAP_SIZE; i++){
 			for(int j = 0; j < MAP_SIZE; j++){
@@ -49,19 +92,10 @@ class PuzzleMap {
 				}
 			}
 		}
-		switch (operate) {
-		case SWIPE_UP:
-			return doSwipeUp();
-		case SWIPE_DOWN:
-			return doSwipeDown();
-		case SWIPE_LEFT:
-			return doSwipeLeft();
-		case SWIPE_RIGHT:
-			return doSwipeLeft();
-		default:
-			break;
-		}
-		return 0;
+		
+		//Dump the map
+		dumpNumberMap();
+		return ret;
 	}
 	
 	public Boolean isOver(){
@@ -82,6 +116,8 @@ class PuzzleMap {
 				return false;
 			}
 		}
+		
+		dumpNumberMap();
 		return true;
 	}
 	
@@ -133,41 +169,113 @@ class PuzzleMap {
 	
 	private int doSwipeDown(){
 		Log.v(TAG, "Do Swipe Down");
-		return 0;
+		int socre = 0;
+		for(int j = 0; j < MAP_SIZE; j++){
+			for(int i = MAP_SIZE - 2; i >= 0; i--){
+				//skip the empty number 
+				if(numberMap[i][j].isEmpty()){
+					continue;
+				}
+				
+				int index = i;
+				while(index < MAP_SIZE - 1){
+					//compare with the below number
+					if(numberMap[index+1][j].isEmpty()){
+						//Above number is empty, replace it
+						numberMap[index+1][j].setNumber(numberMap[index][j]);
+						numberMap[index][j].clear();
+						index++;
+					}else if(!numberMap[index+1][j].hasCombine() && !numberMap[index][j].hasCombine() &&
+							numberMap[index][j].getNumber() == numberMap[index+1][j].getNumber()){
+						//If same number and not combine, combine with it
+						numberMap[index+1][j].combine();
+						numberMap[index][j].clear();
+						socre += numberMap[index+1][j].getNumber();
+						index++;
+					}else{
+						//Below number is different or combined
+						break;
+					}
+				}
+			}
+		}
+		return socre;
 	}
 	
 	private int doSwipeLeft(){
 		Log.v(TAG, "Do Swipe Left");
-		return 0;
+		int socre = 0;
+		for(int i = 0; i < MAP_SIZE; i++){
+			for(int j = 1; j < MAP_SIZE; j++){
+				//skip the empty number 
+				if(numberMap[i][j].isEmpty()){
+					continue;
+				}
+				
+				int index = j;
+				while(index > 0){
+					//compare with the below number
+					if(numberMap[i][index-1].isEmpty()){
+						//Above number is empty, replace it
+						numberMap[i][index-1].setNumber(numberMap[i][index]);
+						numberMap[i][index].clear();
+						index--;
+					}else if(!numberMap[i][index-1].hasCombine() && !numberMap[i][index].hasCombine() &&
+							numberMap[i][index].getNumber() == numberMap[i][index-1].getNumber()){
+						//If same number and not combine, combine with it
+						numberMap[i][index-1].combine();
+						numberMap[i][index].clear();
+						socre += numberMap[i][index-1].getNumber();
+						index--;
+					}else{
+						//Below number is different or combined
+						break;
+					}
+				}
+			}
+		}
+		return socre;
 	}
 	
 	private int doSwipeRight(){
 		Log.v(TAG, "Do Swipe Right");
-		return 0;
+		int socre = 0;
+		for(int i = 0; i < MAP_SIZE; i++){
+			for(int j = MAP_SIZE - 2; j >= 0; j--){
+				//skip the empty number 
+				if(numberMap[i][j].isEmpty()){
+					continue;
+				}
+				
+				int index = j;
+				while(index < MAP_SIZE - 1){
+					//compare with the below number
+					if(numberMap[i][index+1].isEmpty()){
+						//Above number is empty, replace it
+						numberMap[i][index+1].setNumber(numberMap[i][index]);
+						numberMap[i][index].clear();
+						index++;
+					}else if(!numberMap[i][index+1].hasCombine() && !numberMap[i][index].hasCombine() &&
+							numberMap[i][index].getNumber() == numberMap[i][index+1].getNumber()){
+						//If same number and not combine, combine with it
+						numberMap[i][index+1].combine();
+						numberMap[i][index].clear();
+						socre += numberMap[i][index+1].getNumber();
+						index++;
+					}else{
+						//Below number is different or combined
+						break;
+					}
+				}
+			}
+		}
+		return socre;
 	}
 	
 	private void setNumberInMap(int row, int column, int value){
 		Log.v(TAG, String.format("Set Number In Puzzle Map [%d,%d] = %d", row, column, value));
 		PuzzleNumber number = numberMap[row][column];
 		number.setNumber(value);
-	}
-	
-	private void initMap(){
-		
-		Log.v(TAG, "Init the Puzzle Map");
-		//Init the map and empty list
-		for(int i = 0; i < MAP_SIZE; i++){
-			for(int j = 0; j < MAP_SIZE; j++){
-				numberMap[i][j] = new PuzzleNumber();
-			}
-		}
-	
-		//Create two init number
-		generateNewNumberInMap();
-		generateNewNumberInMap();
-		
-		//dump the map for test
-		dumpNumberMap();
 	}
 	
 	private int mapPosition2mapIndex(int row, int column){
