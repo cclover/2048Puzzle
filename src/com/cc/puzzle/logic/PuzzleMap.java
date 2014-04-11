@@ -38,7 +38,7 @@ class PuzzleMap {
 		generateNewNumberInMap(false);
 		
 		if(listener != null){
-			listener.onPuzzleDateChanged(getMapValue());
+			listener.onPuzeleStart(getMapValue(), 0);
 		}
 	}
 	
@@ -112,7 +112,12 @@ class PuzzleMap {
 		dumpNumberMap();
 		
 		//Generate the new number
-		generateNewNumberInMap(true);
+		if(ret >= 0){
+			generateNewNumberInMap(true);
+		}else{
+			//Have not move if ret < 0, reset to 0
+			ret = 0;
+		}
 		return ret;
 	}
 	
@@ -120,8 +125,8 @@ class PuzzleMap {
 		//from [0,0] to [3,3], compare the number with left and below
 		for(int i = 0; i < MAP_SIZE - 1; i++){
 			for(int j = 0; j < MAP_SIZE - 1; j++){
-				if(numberMap[i][j] == numberMap[i][j+1] || 
-						numberMap[i][j] == numberMap[i+1][j]){
+				if(numberMap[i][j].getNumber() == numberMap[i][j+1].getNumber() || 
+						numberMap[i][j].getNumber() == numberMap[i+1][j].getNumber()){
 					return false;
 				}
 			}
@@ -129,8 +134,8 @@ class PuzzleMap {
 		
 		//Compare the column[k,3] and row[3,k]
 		for(int k = 0; k < MAP_SIZE - 1; k++){
-			if(numberMap[k][3] == numberMap[k+1][3] || 
-					numberMap[3][k] == numberMap[3][k+1]){
+			if(numberMap[k][3].getNumber() == numberMap[k+1][3].getNumber() || 
+					numberMap[3][k].getNumber() == numberMap[3][k+1].getNumber()){
 				return false;
 			}
 		}
@@ -199,7 +204,7 @@ class PuzzleMap {
 			if(hasMoved){
 				listener.onPuzzleDateChanged(getMapValue());
 			}else{
-				listener.onPuzzleDateUnChanged();
+				socre = -1;
 			}
 		}
 		return socre;
@@ -244,7 +249,7 @@ class PuzzleMap {
 			if(hasMoved){
 				listener.onPuzzleDateChanged(getMapValue());
 			}else{
-				listener.onPuzzleDateUnChanged();
+				socre = -1;
 			}
 		}
 		return socre;
@@ -289,7 +294,7 @@ class PuzzleMap {
 			if(hasMoved){
 				listener.onPuzzleDateChanged(getMapValue());
 			}else{
-				listener.onPuzzleDateUnChanged();
+				socre = -1;
 			}
 		}
 		return socre;
@@ -334,7 +339,7 @@ class PuzzleMap {
 			if(hasMoved){
 				listener.onPuzzleDateChanged(getMapValue());
 			}else{
-				listener.onPuzzleDateUnChanged();
+				socre = -1;
 			}
 		}
 		return socre;

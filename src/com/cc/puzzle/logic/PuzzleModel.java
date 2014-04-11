@@ -68,7 +68,10 @@ public class PuzzleModel {
 			Log.v(TAG, "The map is full, check is over or not");
 			if(puzzleMap.isOver()){
 				isGameStart = false;
-				Log.v(TAG, "Game Over!");	
+				Log.v(TAG, "Game Over!");
+				if(listener != null){
+					listener.onPuzzleOver(totalScore);
+				}
 				return;
 			}
 		}

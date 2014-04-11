@@ -4,7 +4,7 @@ class PuzzleUtils {
 	
 	public static int generateNumber(){
 		int count = (int)(Math.random()*10)+1; //1-10
-		if(count % 2 == 0){
+		if(count < 7){
 			return 2;
 		}
 		return 4;

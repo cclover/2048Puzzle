@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -33,6 +33,8 @@
         <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
     
+    <style name="ButtonBarButton" />
+
     <style name="TextMapNumber">
         <item name="android:padding">3dp</item>
         <item name="android:layout_width">match_parent</item>
@@ -41,8 +43,14 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_weight">1</item>
         <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/blue</item>
     </style>
     
-    <style name="ButtonBarButton" />
-
+    <style name="TableRowStyle">
+        <item name="android:layout_width">280dp</item>
+        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_weight">1</item>
+    </style> 
+        
 </resources>

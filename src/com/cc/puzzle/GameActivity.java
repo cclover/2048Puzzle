@@ -21,41 +21,34 @@ import android.widget.TextView;
 public class GameActivity extends Activity implements View.OnClickListener, View.OnTouchListener, OnGestureListener, PuzzleModelListener {
 
 	private final String TAG = "GameActivity";
-	
-	//Operate button
-	private Button btnStart;
-	private Button btnRestart;
-	
-	//Score lable
+	private final int FLING_MIN_DISTANCE_X = 100;  
+	private final int FLING_MIN_DISTANCE_Y = 80;  
+
+	//Widget
+	private TextView btnRestart;
 	private TextView txtSocre;
+	private TextView txtOver;
 	private TableLayout tableMap;
 	private TextView[][] numberArray;
 	
+	//Data
 	private PuzzleModel puzzleModel;
-	
 	private int newRow, newColumn;
-	
 	private GestureDetector mGestureDetector;  
-	private final int FLING_MIN_DISTANCE_X = 100;  
-	private final int FLING_MIN_DISTANCE_Y = 80;  
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		//Get the button instance
-		btnStart = (Button)findViewById(R.id.btnStart);
-		btnRestart = (Button)findViewById(R.id.btnReset);
-		
-		//Set click listener
-		btnStart.setOnClickListener(this);
-		btnRestart.setOnClickListener(this);
-		
-		//Get the socre textview
+		//Get the widget instance
+		btnRestart = (TextView)findViewById(R.id.btnReset);
 		txtSocre = (TextView)findViewById(R.id.lableScore);
-		
-		//Get the number textview
+		txtOver = (TextView)findViewById(R.id.txtOver);
+		btnRestart.setOnClickListener(this);
+
+		//Get the number textview widget
 		numberArray = new TextView[4][4];
 		numberArray[0][0] = (TextView)findViewById(R.id.txt_row0_column1);
 		numberArray[0][1] = (TextView)findViewById(R.id.txt_row0_column2);
@@ -77,22 +70,28 @@ public class GameActivity extends Activity implements View.OnClickListener, View
 		//Table swipe event
 		tableMap = (TableLayout)findViewById(R.id.tableMap);
 		tableMap.setOnTouchListener(this);
-		
 		mGestureDetector = new GestureDetector(getApplicationContext(), this);
 		
-		//Create the puzzle model
+		//Create the puzzle model and start
 		puzzleModel = new PuzzleModel();
 		puzzleModel.setListener(this);
+		puzzleModel.start();
 	}
 
 	@Override
 	public void onClick(View v) {
 		int id = v.getId();
-		if(id == R.id.btnStart){
-			puzzleModel.start();
-		}else if(id == R.id.btnReset){
+		if(id == R.id.btnReset){
 			puzzleModel.restart();
+
 		}
+	}
+	
+	@Override
+	public void onPuzeleStart(int[][] mapData, int highScore) {
+		txtSocre.setText("0");
+		txtOver.setVisibility(View.GONE);
+		onPuzzleDateChanged(mapData);
 	}
 	
 	@Override
@@ -117,10 +116,10 @@ public class GameActivity extends Activity implements View.OnClickListener, View
 		newRow = row;
 		newColumn = column;
 	}
-
+	
 	@Override
-	public void onPuzzleDateUnChanged() {
-		numberArray[newRow][newColumn].setBackgroundColor(Color.TRANSPARENT);
+	public void onPuzzleOver(int totalScore) {
+		txtOver.setVisibility(View.VISIBLE);
 	}
 
 	
@@ -187,4 +186,5 @@ public class GameActivity extends Activity implements View.OnClickListener, View
 		Log.v(TAG, "onTouch");
 		return mGestureDetector.onTouchEvent(event);
 	}
+
 }
