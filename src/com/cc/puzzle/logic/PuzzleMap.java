@@ -12,10 +12,13 @@ class PuzzleMap {
 	private final String TAG = "PuzzleMap";
 	private final int MAP_SIZE = 4;
 	private PuzzleNumber[][] numberMap;
+	private int[][] mapValue;
+	private PuzzleModelListener listener;
 	
 	public PuzzleMap(){
 		//Init the map
 		numberMap = new PuzzleNumber[MAP_SIZE][MAP_SIZE];
+		mapValue = new int[MAP_SIZE][MAP_SIZE];
 		for(int i = 0; i < MAP_SIZE; i++){
 			for(int j = 0; j < MAP_SIZE; j++){
 				numberMap[i][j] = new PuzzleNumber();
@@ -23,12 +26,20 @@ class PuzzleMap {
 		}
 	}
 	
+	public void setListener(PuzzleModelListener listener){
+		this.listener = listener;
+	}
+	
 	public void initMap(){
 		Log.v(TAG, "Init the Puzzle Map");
 		
 		//Create two init number
-		generateNewNumberInMap();
-		generateNewNumberInMap();
+		generateNewNumberInMap(false);
+		generateNewNumberInMap(false);
+		
+		if(listener != null){
+			listener.onPuzzleDateChanged(getMapValue());
+		}
 	}
 	
 	public void resetMap(){
@@ -41,7 +52,7 @@ class PuzzleMap {
 		}
 	}
 	
-	public void generateNewNumberInMap(){
+	private void generateNewNumberInMap(Boolean notify){
 		
 		//Get the all empty number position
 		LinkedList<Integer> emptyNumberList = new LinkedList<Integer>();
@@ -60,6 +71,10 @@ class PuzzleMap {
 		int newNumber = PuzzleUtils.generateNumber();
 		Log.v(TAG, "Generate New Number In Puzzle Map");
 		setNumberInMap(position.getRow(), position.getColumn(), newNumber);
+		
+		if(notify && listener != null){
+			listener.onPuzzleNewNumber(position.getRow(), position.getColumn(), newNumber);
+		}
 		
 		//dump map
 		dumpNumberMap();
@@ -95,6 +110,9 @@ class PuzzleMap {
 		
 		//Dump the map
 		dumpNumberMap();
+		
+		//Generate the new number
+		generateNewNumberInMap(true);
 		return ret;
 	}
 	
@@ -132,9 +150,20 @@ class PuzzleMap {
 		return true;
 	}
 	
+	private int[][] getMapValue(){
+		
+		for(int i = 0; i < MAP_SIZE; i++){
+			for(int j = 0; j < MAP_SIZE; j++){
+				mapValue[i][j] = numberMap[i][j].getNumber();
+			}
+		}
+		return mapValue;
+	}
+	
 	private int doSwipeUp(){
 		Log.v(TAG, "Do Swipe Up");
 		int socre = 0;
+		Boolean hasMoved = false;
 		for(int j = 0; j < MAP_SIZE; j++){
 			for(int i = 1; i < MAP_SIZE; i++){//start from second number
 				//skip the empty number 
@@ -150,6 +179,7 @@ class PuzzleMap {
 						numberMap[index-1][j].setNumber(numberMap[index][j]);
 						numberMap[index][j].clear();
 						index--;
+						hasMoved = true;
 					}else if(!numberMap[index-1][j].hasCombine() && !numberMap[index][j].hasCombine() &&
 							numberMap[index][j].getNumber() == numberMap[index-1][j].getNumber()){
 						//If same number and not combine, combine with it
@@ -157,11 +187,19 @@ class PuzzleMap {
 						numberMap[index][j].clear();
 						socre += numberMap[index-1][j].getNumber();
 						index--;
+						hasMoved = true;
 					}else{
 						//Above number is different or combined
 						break;
 					}
 				}
+			}
+		}
+		if(listener != null){
+			if(hasMoved){
+				listener.onPuzzleDateChanged(getMapValue());
+			}else{
+				listener.onPuzzleDateUnChanged();
 			}
 		}
 		return socre;
@@ -170,6 +208,7 @@ class PuzzleMap {
 	private int doSwipeDown(){
 		Log.v(TAG, "Do Swipe Down");
 		int socre = 0;
+		Boolean hasMoved = false;
 		for(int j = 0; j < MAP_SIZE; j++){
 			for(int i = MAP_SIZE - 2; i >= 0; i--){
 				//skip the empty number 
@@ -185,6 +224,7 @@ class PuzzleMap {
 						numberMap[index+1][j].setNumber(numberMap[index][j]);
 						numberMap[index][j].clear();
 						index++;
+						hasMoved = true;
 					}else if(!numberMap[index+1][j].hasCombine() && !numberMap[index][j].hasCombine() &&
 							numberMap[index][j].getNumber() == numberMap[index+1][j].getNumber()){
 						//If same number and not combine, combine with it
@@ -192,11 +232,19 @@ class PuzzleMap {
 						numberMap[index][j].clear();
 						socre += numberMap[index+1][j].getNumber();
 						index++;
+						hasMoved = true;
 					}else{
 						//Below number is different or combined
 						break;
 					}
 				}
+			}
+		}
+		if(listener != null){
+			if(hasMoved){
+				listener.onPuzzleDateChanged(getMapValue());
+			}else{
+				listener.onPuzzleDateUnChanged();
 			}
 		}
 		return socre;
@@ -205,6 +253,7 @@ class PuzzleMap {
 	private int doSwipeLeft(){
 		Log.v(TAG, "Do Swipe Left");
 		int socre = 0;
+		Boolean hasMoved = false;
 		for(int i = 0; i < MAP_SIZE; i++){
 			for(int j = 1; j < MAP_SIZE; j++){
 				//skip the empty number 
@@ -220,6 +269,7 @@ class PuzzleMap {
 						numberMap[i][index-1].setNumber(numberMap[i][index]);
 						numberMap[i][index].clear();
 						index--;
+						hasMoved = true;
 					}else if(!numberMap[i][index-1].hasCombine() && !numberMap[i][index].hasCombine() &&
 							numberMap[i][index].getNumber() == numberMap[i][index-1].getNumber()){
 						//If same number and not combine, combine with it
@@ -227,11 +277,19 @@ class PuzzleMap {
 						numberMap[i][index].clear();
 						socre += numberMap[i][index-1].getNumber();
 						index--;
+						hasMoved = true;
 					}else{
 						//Below number is different or combined
 						break;
 					}
 				}
+			}
+		}
+		if(listener != null){
+			if(hasMoved){
+				listener.onPuzzleDateChanged(getMapValue());
+			}else{
+				listener.onPuzzleDateUnChanged();
 			}
 		}
 		return socre;
@@ -240,6 +298,7 @@ class PuzzleMap {
 	private int doSwipeRight(){
 		Log.v(TAG, "Do Swipe Right");
 		int socre = 0;
+		Boolean hasMoved = false;
 		for(int i = 0; i < MAP_SIZE; i++){
 			for(int j = MAP_SIZE - 2; j >= 0; j--){
 				//skip the empty number 
@@ -255,6 +314,7 @@ class PuzzleMap {
 						numberMap[i][index+1].setNumber(numberMap[i][index]);
 						numberMap[i][index].clear();
 						index++;
+						hasMoved = true;
 					}else if(!numberMap[i][index+1].hasCombine() && !numberMap[i][index].hasCombine() &&
 							numberMap[i][index].getNumber() == numberMap[i][index+1].getNumber()){
 						//If same number and not combine, combine with it
@@ -262,11 +322,19 @@ class PuzzleMap {
 						numberMap[i][index].clear();
 						socre += numberMap[i][index+1].getNumber();
 						index++;
+						hasMoved = true;
 					}else{
 						//Below number is different or combined
 						break;
 					}
 				}
+			}
+		}
+		if(listener != null){
+			if(hasMoved){
+				listener.onPuzzleDateChanged(getMapValue());
+			}else{
+				listener.onPuzzleDateUnChanged();
 			}
 		}
 		return socre;

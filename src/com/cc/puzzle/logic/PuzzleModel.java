@@ -9,6 +9,8 @@ public class PuzzleModel {
 	private int totalScore;
 	private int highScore;
 	private Boolean isGameStart;
+	private Boolean canSwipe;
+	private PuzzleModelListener listener;
 	
 	public enum PuzzleOperate{
 		SWIPE_UP,
@@ -22,13 +24,23 @@ public class PuzzleModel {
 		totalScore = 0;
 		highScore = 0;
 		isGameStart = false;
+		canSwipe = false;
+	}
+	
+	public void setListener(PuzzleModelListener listener){
+		this.listener = listener;
+		puzzleMap.setListener(listener);
 	}
 	
 	public void start(){
+		if(isGameStart){
+			return;
+		}
 		Log.v(TAG, "Start the Game");
 		totalScore = 0;
 		puzzleMap.initMap();
 		isGameStart = true;
+		canSwipe = true;
 	}
 	
 	public void restart(){
@@ -45,6 +57,12 @@ public class PuzzleModel {
 			return;
 		}
 		
+		if(!canSwipe){
+			Log.v(TAG, "In swipe process");
+			return;
+		}
+		
+		canSwipe = false;
 		//Check the map
 		if(puzzleMap.isMapFull()){
 			Log.v(TAG, "The map is full, check is over or not");
@@ -59,15 +77,13 @@ public class PuzzleModel {
 		int score = puzzleMap.doSwipe(operate);
 		if(score > 0){
 			totalScore += score;
+			if(listener != null){
+				listener.onPuzzleScoreChanged(score, totalScore);
+			}
 			Log.d(TAG, String.format("Total Score : %d(+%d)", totalScore, score));
 		}
 		
-		//Generate the new number
-		puzzleMap.generateNewNumberInMap();
+		canSwipe = true;
 	}
-	
 
-	
-	
-	
 }
